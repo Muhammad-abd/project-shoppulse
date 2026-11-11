@@ -63,26 +63,47 @@ def analysis(cleaned_log_in_list_form, amount_filter=None):
     total_refund_per_customer = {}
     status_count = {}
     high_value_refunds = {}
+    payment_method_tracker = {}
 
     for log in cleaned_log_in_list_form:
         category = log[3].capitalize()
         status = log[6].upper()
         customer = log[2]
         order_id = log[0]
+        payment_type = log[5].upper()
         
         try:
             amount = float(log[4])
         except ValueError:
             continue
 
+        # 0. Payment getway tracker
+        payment_method_tracker.setdefault(payment_type, {'total_orders': 0, 'successful_orders': 0, 
+                                                   'failed/other_orders': 0, 'total_revenue': 0.0})
+
+        # 0.1 total_orders_count
+        payment_method_tracker[payment_type]['total_orders'] = payment_method_tracker[payment_type].get('total_orders',0) + 1
+
         # 1. Category Revenue Leaderboard (COMPLETED orders only)
         if status == "COMPLETED":
             total_revenue_per_product_category.setdefault(category, 0.0)
             total_revenue_per_product_category[category] = round(total_revenue_per_product_category[category] + amount, 2)
 
+        # 0.2 successful_transactions_count_per_payment_category_type
+            payment_method_tracker[payment_type]['successful_orders'] = payment_method_tracker[payment_type].get('successful_orders',0) + 1
+
+
             # 2. Top Spending Customers (COMPLETED orders)
             total_spendings_per_customer.setdefault(customer, 0.0)
             total_spendings_per_customer[customer] = round(total_spendings_per_customer[customer] + amount, 2)
+
+            #0.4 total_revenue_per_payment_category
+            payment_method_tracker[payment_type]['total_revenue'] = round((payment_method_tracker[payment_type].get('total_revenue',0) + amount),2)
+
+        else:
+            #0.3 failed_and_other_status_type_count_per_payment_category_type
+            payment_method_tracker[payment_type]['failed/other_orders'] = payment_method_tracker[payment_type].get('failed/other_orders',0) + 1
+            
 
         # 3. Total Refund Per Customer (REFUNDED orders)
         if status == "REFUNDED":
@@ -97,10 +118,12 @@ def analysis(cleaned_log_in_list_form, amount_filter=None):
         status_count.setdefault(status, 0)
         status_count[status] += 1
 
+        
     return (
         total_revenue_per_product_category, 
         total_spendings_per_customer, 
         total_refund_per_customer, 
         status_count, 
-        high_value_refunds
+        high_value_refunds,
+        payment_method_tracker
     )

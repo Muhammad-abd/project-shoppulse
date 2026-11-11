@@ -36,7 +36,8 @@ def main():
         total_spendings_per_customer, 
         total_refund_per_customer, 
         status_count, 
-        high_value_refunds
+        high_value_refunds,
+        payment_method_tracker
     ) = analysis(cleaned_log_in_list_form, amount_filter)
 
     sorted_total_revenue_per_product_category = sorted(total_revenue_per_product_category.items(), key=lambda x: -x[1])[:top_filter]
@@ -69,6 +70,15 @@ def main():
     for k, v in sorted_high_value_refunds:
         print(f" {k:<11} : ${v}")
     print("-" * 50)
+
+    print("\nPAYMENT GATEWAY REPORT")
+    print("-" * 84)
+    print(f"{'Payment Method':<16} | {'Total Orders':<14} | {'Successful':<14} | {'Failed/Other':<14} | {'Total Revenue':<12}")
+    print("-" * 84)
+    
+    for k, v in payment_method_tracker.items():
+        print(f"{k:<16} | {v['total_orders']:<14} | {v['successful_orders']:<14} | {v['failed/other_orders']:<14} | ${v['total_revenue']:>11.2f}")
+    print("-" * 84)
 
 if __name__ == "__main__":
     main()
