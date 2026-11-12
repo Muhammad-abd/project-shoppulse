@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def reading_raw_logs(file_name):
     try:
@@ -64,6 +64,7 @@ def analysis(cleaned_log_in_list_form, amount_filter=None):
     status_count = {}
     high_value_refunds = {}
     payment_method_tracker = {}
+    hourly_order_revenue_analysis = {}
 
     for log in cleaned_log_in_list_form:
         category = log[3].capitalize()
@@ -71,11 +72,29 @@ def analysis(cleaned_log_in_list_form, amount_filter=None):
         customer = log[2]
         order_id = log[0]
         payment_type = log[5].upper()
+        date_time = log[1]
+        date_time_in_list_form = date_time.split()
+        time_string = date_time_in_list_form[1].strip()
+        time = datetime.strptime(time_string, '%H:%M:%S').time()
+        #diff_time = timedelta(hours=0, minutes=59, seconds=59) 
+        round_off_time_only_hours = time.replace(minute=0, second=0)
+        #time_diff = time - round_off_time_only_hours
+        time_block = round_off_time_only_hours.strftime("%H:%M")
         
         try:
             amount = float(log[4])
         except ValueError:
             continue
+
+        #hourly_order_review_analysis
+        #if time_diff <= diff_time:
+        hourly_order_revenue_analysis.setdefault(time_block, {'total_orders':0, 'total_revenue': 0.0}) 
+        hourly_order_revenue_analysis[time_block]['total_orders'] = hourly_order_revenue_analysis[time_block].get('total_orders',0) + 1
+
+        
+            
+
+
 
         # 0. Payment getway tracker
         payment_method_tracker.setdefault(payment_type, {'total_orders': 0, 'successful_orders': 0, 
@@ -99,6 +118,8 @@ def analysis(cleaned_log_in_list_form, amount_filter=None):
 
             #0.4 total_revenue_per_payment_category
             payment_method_tracker[payment_type]['total_revenue'] = round((payment_method_tracker[payment_type].get('total_revenue',0) + amount),2)
+
+            hourly_order_revenue_analysis[time_block]['total_revenue'] = hourly_order_revenue_analysis[time_block].get('total_revenue',0) + amount
 
         else:
             #0.3 failed_and_other_status_type_count_per_payment_category_type
@@ -125,5 +146,6 @@ def analysis(cleaned_log_in_list_form, amount_filter=None):
         total_refund_per_customer, 
         status_count, 
         high_value_refunds,
-        payment_method_tracker
+        payment_method_tracker,
+        hourly_order_revenue_analysis
     )

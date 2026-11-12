@@ -37,13 +37,15 @@ def main():
         total_refund_per_customer, 
         status_count, 
         high_value_refunds,
-        payment_method_tracker
+        payment_method_tracker,
+        hourly_order_revenue_analysis
     ) = analysis(cleaned_log_in_list_form, amount_filter)
 
     sorted_total_revenue_per_product_category = sorted(total_revenue_per_product_category.items(), key=lambda x: -x[1])[:top_filter]
     sorted_total_spendings_per_customer = sorted(total_spendings_per_customer.items(), key=lambda x: -x[1])[:top_filter]
     sorted_total_refund_per_customer = sorted(total_refund_per_customer.items(), key=lambda x: -x[1])[:top_filter]
     sorted_high_value_refunds = sorted(high_value_refunds.items(), key=lambda x: -x[1])[:top_filter]
+    sorted_hourly_order_revenue_analysis = sorted(hourly_order_revenue_analysis.items(), key= lambda x:-x[1]['total_orders'])[:top_filter]
 
     print("\nTOTAL REVENUE PER PRODUCT CATEGORY")
     print("-" * 50)
@@ -72,13 +74,24 @@ def main():
     print("-" * 50)
 
     print("\nPAYMENT GATEWAY REPORT")
-    print("-" * 84)
+    print("-" * 83)
     print(f"{'Payment Method':<16} | {'Total Orders':<14} | {'Successful':<14} | {'Failed/Other':<14} | {'Total Revenue':<12}")
-    print("-" * 84)
+    print("-" * 83)
     
     for k, v in payment_method_tracker.items():
         print(f"{k:<16} | {v['total_orders']:<14} | {v['successful_orders']:<14} | {v['failed/other_orders']:<14} | ${v['total_revenue']:>11.2f}")
-    print("-" * 84)
+    print("-" * 83)
+
+    print("\nHOURLY ORDER ANALYSIS")
+    print("-" * 50)
+    print(f"{'Time block':<16} | {'Total Orders':<14} | {'Total Revenue':<12}")
+    print("-" * 50)
+
+    for k,v in sorted_hourly_order_revenue_analysis:
+        print(f"{k:<16} | {v['total_orders']:<14} | ${v['total_revenue']:>11.2f}")
+    print("-" * 50)
 
 if __name__ == "__main__":
     main()
+
+
