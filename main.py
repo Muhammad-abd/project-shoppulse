@@ -38,7 +38,8 @@ def main():
         status_count, 
         high_value_refunds,
         payment_method_tracker,
-        hourly_order_revenue_analysis
+        hourly_order_revenue_analysis,
+        customer_loyalty_tier
     ) = analysis(cleaned_log_in_list_form, amount_filter)
 
     sorted_total_revenue_per_product_category = sorted(total_revenue_per_product_category.items(), key=lambda x: -x[1])[:top_filter]
@@ -46,6 +47,9 @@ def main():
     sorted_total_refund_per_customer = sorted(total_refund_per_customer.items(), key=lambda x: -x[1])[:top_filter]
     sorted_high_value_refunds = sorted(high_value_refunds.items(), key=lambda x: -x[1])[:top_filter]
     sorted_hourly_order_revenue_analysis = sorted(hourly_order_revenue_analysis.items(), key= lambda x:-x[1]['total_orders'])[:top_filter]
+    sorted_customer_loyalty_tier = {
+        tier: dict(sorted(customer_revenue_dict.items(), key = lambda x:-x[1])) for tier,customer_revenue_dict in customer_loyalty_tier.items()
+    }
 
     print("\nTOTAL REVENUE PER PRODUCT CATEGORY")
     print("-" * 50)
@@ -91,7 +95,17 @@ def main():
         print(f"{k:<16} | {v['total_orders']:<14} | ${v['total_revenue']:>11.2f}")
     print("-" * 50)
 
+    print("\nCUSTOMER LOYALTY TIER")
+    print("-" * 50)
+    print(f"{'TIER CATEGORY':<16} | {'CUSTOMER':<14} | {'TOTAL REVENUE':<12}")
+    print("-" * 50)
+    for tier_category,dict_customer_revenue in sorted_customer_loyalty_tier.items():
+        for customer,revenue in dict_customer_revenue.items():
+            print(f" {tier_category:<16} | {customer:<14} | ${revenue:>10.2f}")
+
 if __name__ == "__main__":
     main()
+
+
 
 
